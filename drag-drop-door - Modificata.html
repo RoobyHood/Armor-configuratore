@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <title>Doors</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --hilite-size: 5px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0 0 0 50px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        h1 {
+            padding-bottom: 20px;
+            padding-top: 10px;
+        }
+
+        h5{
+            font-size: 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 4fr 1fr 5fr;
+        }
+
+        .grid-container .second{
+           line-height: 70px;
+           padding-left: 20px;
+           text-align: right;
+        }
+
+        .hilite {
+            box-shadow:
+                inset var(--hilite-size) var(--hilite-size) 0 #f00,
+                inset calc(var(--hilite-size) * -1) calc(var(--hilite-size) * -1) 0 #f00;
+        }
+
+        #wall {
+            background: #ddd;
+            height: 500px;
+            position: relative;
+        }
+
+        #frame {
+            background-color: rgb(255, 255, 255);
+            bottom: 0;
+            height: 420px;
+            left: 180px;
+            position: absolute;
+            width: 240px;
+            z-index: 2;
+        }
+
+        #door {
+            background: rgb(128, 90, 25);
+            bottom: 0;
+            position: absolute;
+            height: 400px;
+            left: 200px;
+            width: 200px;
+            z-index: 2;
+        }
+
+        #handle {
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            height: 60px;
+            left: 10px;
+            position: absolute;
+            top: 190px;
+            width: 60px;
+        }
+
+        #wall-tmp span,
+        #frame-tmp span,
+        #door-tmp span,
+        #handle-tmp span {
+            background-image: url(img/pattern/bricks.jpg);
+            background-image: var(--bg-img);
+            background-size: contain;
+            display: inline-block;
+            height: 80px;
+            margin: 15px 10px;
+            text-align: center;
+            padding-top: 30px;
+            width: 80px;
+        }
+
+        #handle-tmp span {
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        #bill {
+            line-height: 2em;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        #bill div{
+            font-size: 18px;
+        }
+
+        #bill div span{
+            font-size: 22px;
+        }
+
+        #templates {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>PROGETTA LA TUA PORTA</h1>
+
+    <div class="grid-container">
+
+        <div class="first">
+
+            <div id="wall" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <div id="frame" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                <div id="door" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div id="handle" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+
+            <div id="bill">
+                <h2>PREVENTIVO</h2>
+                <div>Prezzo telaio: $ <strong id="frame-price">0</strong></div>
+                <div>Prezzo rivestimento: $ <strong id="door-price">0</strong></div>
+                <div>Prezzo maniglia $ <strong id="handle-price">0</strong></div>
+                <HR>
+                <div><span>TOTALE $</span> <strong id="total-price">0</strong></div>
+            </div>
+    
+        </div>
+
+        <div class="second">
+
+            <div class="title">
+                <h5>MURO</h5>
+                <h5>TELAIO</h5>
+                <h5>RIVESTIMENTO</h5>
+                <h5>MANIGLIA</h5>
+                <h5>SERRATURA</h5>
+                <h5>VETRO</h5>
+                <h5>SPIONCINO</h5>
+            </div>
+
+            
+        </div>
+
+        <div class="third">
+            <div id="templates">
+    
+                <div id="wall-tmp"></div>
+                <div id="frame-tmp"></div>
+                <div id="door-tmp"></div>
+                <div id="handle-tmp"></div>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>
+        const patternFolder = "img/pattern/"; // path cartella pattern
+
+        const wall = document.getElementById("wall");
+        const frame = document.getElementById("frame");
+        const door = document.getElementById("door");
+        const handle = document.getElementById("handle");
+        const totalPrice = document.getElementById("total-price");
+
+        var wallData = [ // dati del muro (DB)
+            {
+                codice: 122,
+                nome: "mattoni standard",
+                pattern: "mattoni1.png",
+                prezzo: 12
+            },
+            {
+                codice: 124,
+                nome: "mattoni colorati",
+                pattern: "mattoni2.png",
+                prezzo: 14
+            },
+            {
+                codice: 125,
+                nome: "mattoni grigi",
+                pattern: "mattoni3.png",
+                prezzo: 14
+            },
+            {
+                codice: 126,
+                nome: "mattoni bianchi",
+                pattern: "mattoni4.png",
+                prezzo: 52
+            },
+            {
+                codice: 456,
+                nome: "cemento grezzo",
+                pattern: "cemento1.png",
+                prezzo: 8
+            },
+            {
+                codice: 457,
+                nome: "cemento lisciato",
+                pattern: "cemento2.png",
+                prezzo: 10
+            },
+            {
+                codice: 458,
+                nome: "cemento bianco",
+                pattern: "cemento3.png",
+                prezzo: 80
+            },
+
+        ];
+        var frameData = [ // dati del telaio  (DB)
+            {
+                codice: 304,
+                nome: "classico",
+                pattern: "cornice1.jpeg",
+                prezzo: 35
+            },
+            {
+                codice: 309,
+                nome: "classico",
+                pattern: "cornice2.jpeg",
+                prezzo: 16
+            },
+            {
+                codice: 318,
+                nome: "classico",
+                pattern: "cornice3.jpeg",
+                prezzo: 56
+            }
+
+        ];
+        var doorData = [ // dati porte  (DB)
+            {
+                codice: 23,
+                nome: "noce chiaro",
+                pattern: "light-walnut.jpg",
+                prezzo: 34
+            },
+            {
+                codice: 24,
+                nome: "noce",
+                pattern: "walnut.jpg",
+                prezzo: 36
+            },
+            {
+                codice: 563,
+                nome: "tek",
+                pattern: "teak.jpg",
+                prezzo: 46
+            },
+            {
+                codice: 789,
+                nome: "ciliegio",
+                pattern: "ciliegio.jpg",
+                prezzo: 40
+            }
+        ];
+        var doorData2 = { // dati porte  (DB)
+            "23": {
+                codice: 23,
+                nome: "noce chiaro",
+                pattern: "url"
+            },
+            "563": {
+                codice: 563,
+                nome: "tek",
+                pattern: "url"
+            },
+            "789": {
+                codice: 789,
+                nome: "ciliegio",
+                pattern: "url"
+            }
+        };
+        var handleData = [ // dati porte  (DB)
+            {
+                codice: 34,
+                nome: "ottone satinata",
+                pattern: "maniglia1.png",
+                prezzo: 12
+            },
+            {
+                codice: 757,
+                nome: "acciaio satinato",
+                pattern: "maniglia2.png",
+                prezzo: 16
+            },
+            {
+                codice: 11,
+                nome: "ottone classica",
+                pattern: "maniglia3.png",
+                prezzo: 13
+            },
+            {
+                codice: 19,
+                nome: "acciao moderno",
+                pattern: "maniglia4.png",
+                prezzo: 16
+            }
+        ];
+
+        var dragType, dragElem, dragPrice;
+
+        function updateTotal() {
+            // ricavo il valore di porta e maniglia
+            var handleValue = parseFloat(document.getElementById("handle-price").innerText);
+            var doorValue = parseFloat(document.getElementById("door-price").innerText);
+            // aggiorno il totale
+            totalPrice.innerText = handleValue + doorValue;
+        }
+
+        function dragStart(evt) {
+            // registro il tipo di oggetto in drag
+            dragElem = evt.target;
+            var id = $(dragElem).parent().attr("id");
+            dragType = id.split("-")[0];
+            // evidenzio l'elemento target
+            // NB document.getElementById(dragType) == window[dragType]
+            document.getElementById(dragType).classList.add("hilite");
+            // ricavo il prezzo dell'elemento
+            dragPrice = parseFloat(dragElem.dataset.price);
+            console.log(dragType);
+        }
+
+        function drop(evt) {
+            // controllo che l'elem ricevente sia corretto
+            // id elem. ricevente
+            var recId = evt.target.id;
+            // cambio la bg-img
+            if (recId == dragType) {
+                var bgImg = getComputedStyle(dragElem).backgroundImage;
+                evt.target.style.backgroundImage = bgImg;
+            }
+            // calcolo totale porta e maniglia
+            document.getElementById(dragType + "-price").innerText = dragPrice;
+            updateTotal();
+        }
+
+        function dragEnd(evt) {
+            document.getElementById(dragType).classList.remove("hilite");
+        }
+
+        function allowDrop(evt) {
+            evt.preventDefault();
+        }
+
+        // costruisce gli elementi per drag&drop
+        function buildTemplates(which, data) {
+            // percorro i data
+            $.each(data, function (index, elem) {
+                // aggiungo uno span all'elem which
+                $(which).append(`<span draggable='true'
+                    ondragstart='dragStart(event);'
+                    ondragend='dragEnd(event);'
+                    data-price='${elem.prezzo}'
+                    style='--bg-img: url(${patternFolder}${elem.pattern});'
+                    >${elem.codice}</span>`);
+            });
+        }
+
+        buildTemplates(document.getElementById("wall-tmp"), wallData);
+        buildTemplates(document.getElementById("frame-tmp"), frameData);
+        buildTemplates(document.getElementById("door-tmp"), doorData);
+        buildTemplates(document.getElementById("handle-tmp"), handleData);
+    </script>
+</body>
+
+</html>
